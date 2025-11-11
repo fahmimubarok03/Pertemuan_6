@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:pertemuan_6/data/model/transaction.dart';
 import 'package:pertemuan_6/data/repository/money_repository.dart';
 
-class InsertPage extends StatefulWidget {
-  const InsertPage({super.key});
+class UpdatePage extends StatefulWidget {
+  final Transaction ts;
+
+  const UpdatePage({super.key, required this.ts});
 
   @override
-  State<InsertPage> createState() => _InsertPageState();
+  State<UpdatePage> createState() => _UpdatePageState();
 }
 
-class _InsertPageState extends State<InsertPage> {
+class _UpdatePageState extends State<UpdatePage> {
   List<String> categories = [
     'Gaji',
     'Makanan',
@@ -35,6 +37,16 @@ class _InsertPageState extends State<InsertPage> {
     super.dispose();
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _type = widget.ts.type;
+    _categoryCtr.text = widget.ts.category;
+    _descCtr.text = widget.ts.description;
+    _amountCtr.text = widget.ts.amount.toString();
+    _selectedDate = DateTime.parse(widget.ts.date);
+  }
+
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
@@ -50,6 +62,7 @@ class _InsertPageState extends State<InsertPage> {
     final amount = double.tryParse(_amountCtr.text) ?? 0.0;
 
     final tx = Transaction(
+      id: widget.ts.id,
       type: _type,
       category: _categoryCtr.text.trim(),
       description: _descCtr.text.trim(),
@@ -57,7 +70,7 @@ class _InsertPageState extends State<InsertPage> {
       date: _selectedDate.toIso8601String(),
     );
 
-    await _repo.insertTransaction(tx);
+    await _repo.updateTransaction(widget.ts.id!, tx);
     // return true to caller so it can refresh list if needed
     if (mounted) Navigator.of(context).pop(true);
   }
@@ -65,7 +78,7 @@ class _InsertPageState extends State<InsertPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tambah Transaksi')),
+      appBar: AppBar(title: const Text('Update Transaksi')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -85,6 +98,7 @@ class _InsertPageState extends State<InsertPage> {
 
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(labelText: 'Kategori'),
+                value: _categoryCtr.text,
                 items: categories
                     .map(
                       (cat) => DropdownMenuItem(value: cat, child: Text(cat)),
@@ -134,7 +148,7 @@ class _InsertPageState extends State<InsertPage> {
                   ),
                   const SizedBox(width: 20),
 
-                  ElevatedButton(onPressed: _save, child: const Text('Simpan')),
+                  ElevatedButton(onPressed: _save, child: const Text('Update')),
                 ],
               ),
             ],
